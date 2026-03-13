@@ -1,0 +1,3 @@
+enum class Atributo {
+    AGUA, FUEGO, VIENTO, TIERRA, LUZ, OSCURIDAD, DIVINO
+}
