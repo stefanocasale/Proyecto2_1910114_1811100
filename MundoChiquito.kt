@@ -5,8 +5,8 @@ class CartaMostro(
     val poder: Int
 ) {
     init {
-        require(nivel in 1..12) { "Nivel debe estar entre 1 y 12" } [cite: 3]
-        require(poder % 50 == 0) { "Poder debe ser múltiplo de 50" } [cite: 3]
+        require(nivel in 1..12) { "Nivel debe estar entre 1 y 12" }
+        require(poder % 50 == 0) { "Poder debe ser múltiplo de 50" } 
     }
 
     override fun toString(): String = nombre
