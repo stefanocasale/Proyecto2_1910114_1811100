@@ -100,15 +100,15 @@ fun leerMazo(): List<CartaMostro> {
 fun construirGrafoMundoChiquito(cartas: List<CartaMostro>): ListaAdyacenciaGrafo<CartaMostro> {
     val grafo = ListaAdyacenciaGrafo<CartaMostro>()
 
-    // Transformación funcional para reducir la lista a elementos únicos por identificador (nombre)
+    // Transformamos la lista vértices únicos por nombre
     val cartasUnicas = cartas.distinctBy { it.nombre }
 
-    // Inserción de vértices en la estructura del grafo
+    // Insertamos los vértices al grafo
     for (carta in cartasUnicas) {
         grafo.agregarVertice(carta)
     }
 
-    // Establecimiento de aristas mediante comparación de pares
+    // Establecemos las aristas 
     for (i in cartasUnicas.indices) {
         for (j in i + 1 until cartasUnicas.size) {
             val cartaA = cartasUnicas[i]
@@ -132,12 +132,11 @@ fun construirGrafoMundoChiquito(cartas: List<CartaMostro>): ListaAdyacenciaGrafo
 fun sonAdyacentes(a: CartaMostro, b: CartaMostro): Boolean {
     var coincidencias = 0
     
-    // Evaluación comparativa de los atributos de los objetos
+    // Buscamos las coincidencias de los atributos
     if (a.nivel == b.nivel) coincidencias++
     if (a.atributo == b.atributo) coincidencias++
     if (a.poder == b.poder) coincidencias++
     
-    // Retorna verdadero únicamente si el grado de coincidencia es igual a uno
     return coincidencias == 1
 }
 
@@ -148,13 +147,20 @@ fun sonAdyacentes(a: CartaMostro, b: CartaMostro): Boolean {
  */
 fun encontrarTernas(grafo: ListaAdyacenciaGrafo<CartaMostro>): List<Triple<CartaMostro, CartaMostro, CartaMostro>> {
     val ternas = mutableListOf<Triple<CartaMostro, CartaMostro, CartaMostro>>()
-    val vertices = grafo.obtenerVertices()  // Usamos el método que agregaste
+    val vertices = grafo.obtenerVertices()
 
+    // Iteramos sobre los vértices
     for (cartaMano in vertices) {
         val vecinosMano = grafo.obtenerArcosSalida(cartaMano)
+
+        // Iteramos sobre los vecinos de cada vértice
         for (cartaMazo1 in vecinosMano) {
             val vecinosMazo1 = grafo.obtenerArcosSalida(cartaMazo1)
+            
+            // Iteramos sobre los vecinos de cada vecino
             for (cartaMazo2 in vecinosMazo1) {
+
+                // Almacenamos la terna
                 ternas.add(Triple(cartaMano, cartaMazo1, cartaMazo2))
             }
         }
@@ -166,6 +172,7 @@ fun encontrarTernas(grafo: ListaAdyacenciaGrafo<CartaMostro>): List<Triple<Carta
  * Imprime cada terna en una línea, con los nombres separados por espacios.
  */
 fun imprimirTernas(ternas: List<Triple<CartaMostro, CartaMostro, CartaMostro>>) {
+    // Recorremos cada terna almacenada
     for ((mano, mazo1, mazo2) in ternas) {
         println("${mano.nombre} ${mazo1.nombre} ${mazo2.nombre}")
     }
