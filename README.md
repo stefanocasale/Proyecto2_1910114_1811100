@@ -56,7 +56,6 @@ Finalmente imprimimos cada una de las ternas en la lista.
     
 # Tabla de complejidad computacional (Big O)
 
-## Tabla de complejidad computacional (Big O)
 
 | Método                      | Complejidad       | Descripción                                                                                       |
 |-----------------------------|-------------------|---------------------------------------------------------------------------------------------------|
