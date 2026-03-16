@@ -22,17 +22,20 @@ Al compilar se crea una carpeta "out" en tu entorno. Contiene los archivos ya co
 
 # Funcionamiento
 El programa simula el efecto de la carta de conjuro "Mundo Chiquito" del juego de cartas coleccionables Duelo de cartas mostro. Dado un archivo CSV (deck.csv) que contiene una lista de cartas mostro, el programa:
-    1. Lee y valida el archivo CSV: Se asegura que cada carta cumpla con las reglas del juego:
-        - Nivel entre 1 y 12
-        - Atributo válido
-        - Poder múltiplo de 50
-        - Mazo entre 40 y 60 cartas
-    2. Construye un grafo no dirigido con las siguientes características
-        - Los vértices son las cartas 
-        - Existe una arista entre dos vértices si comparten exactamente una de las 3 características (nivel, poder, atributo)
-    3. Encuentra las ternas que cumplen con:
-        - <cartaMazo1> es vecio de <cartaMano> en el grafo
-        - <cartraMazo2> es vecino de <cartaMazo1>
+
+1. Lee y valida el archivo CSV: Se asegura que cada carta cumpla con las reglas del juego:
+    - Nivel entre 1 y 12.
+    - Atributo válido.
+    - Poder múltiplo de 50.
+    - Mazo entre 40 y 60 cartas.
+
+2. Construye un grafo no dirigido con las siguientes características
+    - Los vértices son las cartas. 
+    - Existe una arista entre dos vértices si comparten exactamente una de las 3 características (nivel, poder, atributo).
+
+3. Encuentra las ternas que cumplen con:
+    - <cartaMazo1> es vecio de <cartaMano> en el grafo.
+    - <cartraMazo2> es vecino de <cartaMazo1>.
 
 
 # Decisiones de Implementacion
@@ -41,13 +44,17 @@ Si el archivo tiene un error y el mazo no es válido, no construimos el grafo in
 Reutilizamos la clase ListaAdyacenciaGrafo del proyecto 1 para implementar un grafo por listas de adyacencia.
 
 Para la construccion del grafo:
-    - Tomamos vértices únicos dado por el nombre de la carta. Usamos distinctBy { it.nombre } sobre la lista de cartas leídas para obtener una lista de cartas únicas. De esta manera, para las relaciones, todas las copias son equivalentes. Luego iteramos sobre las cartas únicas y las insertamos en el mapa con una lista vacía de vecinos
-    - Comparamos cada par de cartas una sola vez. Si son adyacentes, entonces creamos un grafo no dirigido.
-    - Se cuentan las propiedades compartidas
+- Tomamos vértices únicos dado por el nombre de la carta. Usamos distinctBy { it.nombre } sobre la lista de cartas leídas para obtener una lista de cartas únicas. De esta manera, para las relaciones, todas las copias son equivalentes. Luego iteramos sobre las cartas únicas y las insertamos en el mapa con una lista vacía de vecinos.
+
+- Comparamos cada par de cartas una sola vez. Si son adyacentes, entonces creamos un grafo no dirigido.
+
+- Se cuentan las propiedades compartidas.
 
 Para la búsqueda de ternas se tuvo el objetivo de enontrar todas las combinaciones de (cartaMano, cartaMazo1, cartaMazo2) que complan con:
+
     - <cartaMazo1> es vecio de <cartaMano> en el grafo
     - <cartraMazo2> es vecino de <cartaMazo1>
+
 Lo que significa, encontrar los caminos de longitud 2 en el grafo. Pudimos usar DFS con profundidad maxima 2 pero sería introducir complejidad innecesaria al código. Optamos por un triple bucle anidado que, para cada vértice, explora todos sus vecinos y para cada vecino, explora todos sus vecinos. Cada combinación genera una terna.
 
 Cada terna se almacena con una lista de Triple<CartaMostro, CartaMostro, CartaMostro>
