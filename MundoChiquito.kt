@@ -1,56 +1,93 @@
-/**
- * Lee y procesa un archivo CSV para extraer la información de los nodos.
- * Implementa validaciones de dominio para asegurar la integridad de los datos cargados.
+/*
+ *  Lee y procesa un archivo CSV para extraer la información de los nodos.
+ *  Implementa validaciones de dominio para asegurar la integridad de los datos cargados.
+ *  Si encuentra algún error, lanza excepción y detiene la ejecución
  */
 fun leerMazo(): List<CartaMostro> {
     val listaDeCartas = mutableListOf<CartaMostro>()
     val conteoNombres = mutableMapOf<String, Int>()
     
-    // Acceso al sistema de archivos local para obtener el recurso de datos
+    // Accedemos al archivo
     val archivo = java.io.File("deck.csv")
     if (!archivo.exists()) {
-        println("Error: Archivo de datos no encontrado.")
+        throw IllegalArgumentException("Error: Archivo de datos no encontrado.")
         return listaDeCartas
     }
 
+    // Verificamos que hay datos
     val lineas = archivo.readLines()
+    if (lineas.size < 2) {
+        throw IllegalArgumentException("Error, el archivo no tiene datos")
+    }
     
-    // Procesamiento iterativo de las filas, omitiendo la línea de encabezado
+    // Procesamos cada una de las filas
     for (i in 1 until lineas.size) {
         val columnas = lineas[i].split(",").map { it.trim() }
-        
-        // Verificación de integridad estructural (número de columnas esperado)
-        if (columnas.size == 4) {
-            try {
-                val nombre = columnas[0]
-                
-                // Limita la cantidad de ejemplares por identificador único
-                val copiasActuales = conteoNombres.getOrDefault(nombre, 0)
-                if (copiasActuales >= 3) {
-                    continue 
-                }
+        val linea = lineas[i].trim()
 
-                // Instanciación del objeto de datos con casting de tipos y normalización de Enums
-                val c = CartaMostro(
-                    nombre, 
-                    columnas[1].toInt(), 
-                    Atributo.valueOf(columnas[2].uppercase()), 
-                    columnas[3].toInt()
-                )
-                
-                listaDeCartas.add(c)
-                conteoNombres[nombre] = copiasActuales + 1
-                
-            } catch (e: Exception) {
-                // Captura de excepciones por errores de formato en el CSV o fallos en validaciones internas
-                println("Error en la entrada de datos - línea $i: ${e.message}")
-            }
+        // Saltamos las líneas vacías
+        if (linea.isBlank()) {
+            continue
         }
+        
+        // Verificamos la cantidad de atributos
+        if (columnas.size != 4) {
+            throw IllegalArgumentException("Error en la línea ${i+1}: No tiene los 4 atributos")
+            continue
+        }
+
+        val nombre = columnas[0]
+                
+        // Verificamos que el nombre no este vacío
+        if (nombre.isBlank()) {
+            throw IllegalArgumentException("Error en linea ${i+1}: El nombre no debe estas vacío")
+            continue
+        }
+
+        // Verificamos que el nivel sea un entero
+        val nivel = try {
+            columnas[1].toInt()
+        } catch (e: NumberFormatException) {
+            throw IllegalArgumentException("Error en línea ${i+1}: El nivel debe ser un número entero")
+        }
+
+        // Verificamos que el poder sea entero
+        val poder = try {
+            columnas[3].toInt()
+        } catch (e: NumberFormatException) {
+            throw IllegalArgumentException("Errror en línea ${i+1}: El poder no cumple el formato válido")
+        }
+
+        // Verificamos el atributo
+        val atributoStr = columnas[2].uppercase()
+        val atributo = try {
+            Atributo.valueOf(atributoStr)
+        } catch (e: IllegalArgumentException) {
+            throw IllegalArgumentException("Error en linea ${i+1}: El atributo no es válido")
+            continue
+        }
+
+        // Verificamos el límite de copias
+        val copiasActuales = conteoNombres.getOrDefault(nombre, 0)
+        if (copiasActuales >= 3) {
+            continue 
+        }        
+
+        // Creamos la carta
+        val carta = CartaMostro(
+            nombre, 
+            nivel,
+            atributo,
+            poder
+        )
+                
+        listaDeCartas.add(carta)
+        conteoNombres[nombre] = copiasActuales + 1
     }
 
-    // Validación de rango para la colección total procesada
+    // Verificamos el rango del mazo
     if (listaDeCartas.size < 40 || listaDeCartas.size > 60) {
-        println("Aviso: La colección total no cumple con los límites de tamaño estándar.")
+        throw IllegalArgumentException("El mazo debe tener entre 40 y 60 cartas")
     }
 
     return listaDeCartas
@@ -104,18 +141,55 @@ fun sonAdyacentes(a: CartaMostro, b: CartaMostro): Boolean {
     return coincidencias == 1
 }
 
+/**
+ * Encuentra todas las ternas (cartaMano, cartaMazo1, cartaMazo2) que cumplen:
+ * - cartaMazo1 es vecino de cartaMano
+ * - cartaMazo2 es vecino de cartaMazo1
+ */
+fun encontrarTernas(grafo: ListaAdyacenciaGrafo<CartaMostro>): List<Triple<CartaMostro, CartaMostro, CartaMostro>> {
+    val ternas = mutableListOf<Triple<CartaMostro, CartaMostro, CartaMostro>>()
+    val vertices = grafo.obtenerVertices()  // Usamos el método que agregaste
+
+    for (cartaMano in vertices) {
+        val vecinosMano = grafo.obtenerArcosSalida(cartaMano)
+        for (cartaMazo1 in vecinosMano) {
+            val vecinosMazo1 = grafo.obtenerArcosSalida(cartaMazo1)
+            for (cartaMazo2 in vecinosMazo1) {
+                ternas.add(Triple(cartaMano, cartaMazo1, cartaMazo2))
+            }
+        }
+    }
+    return ternas
+}
+
+/**
+ * Imprime cada terna en una línea, con los nombres separados por espacios.
+ */
+fun imprimirTernas(ternas: List<Triple<CartaMostro, CartaMostro, CartaMostro>>) {
+    for ((mano, mazo1, mazo2) in ternas) {
+        println("${mano.nombre} ${mazo1.nombre} ${mazo2.nombre}")
+    }
+}
 
 /**
  * Punto de entrada principal para la ejecución del programa y orquestación de módulos.
  */
 fun main() {
-    // Inicialización del flujo de carga de datos
-    val mazo = leerMazo()
+    try {
+        // Iniciamos la carga de datos
+        val mazo = leerMazo()
     
-    // Generación de la estructura de datos relacional (Grafo)
-    val grafo = construirGrafoMundoChiquito(mazo)
-    
-    // Salida informativa sobre el estado final de la construcción
-    println("Proceso finalizado.")
-    println("Total de elementos únicos (vértices): ${grafo.tamano()}")
+        // Construimos el Grafo
+        val grafo = construirGrafoMundoChiquito(mazo)
+
+        // Creamos las ternas
+        val ternas = encontrarTernas(grafo)
+
+        // Imprimimos las ternas
+        imprimirTernas(ternas)
+    } catch (e: IllegalArgumentException) {
+        println(e.message)
+        // Salimos del código porque el mazo no tiene entre 40 y 60 cartas válidas
+        System.exit(1)
+    }
 }
