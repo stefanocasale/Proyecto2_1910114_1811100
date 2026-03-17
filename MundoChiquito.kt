@@ -1,7 +1,7 @@
 /*
- *  Lee y procesa un archivo CSV para extraer la información de los nodos.
- *  Implementa validaciones de dominio para asegurar la integridad de los datos cargados.
- *  Si encuentra algún error, lanza excepción y detiene la ejecución
+ * Lee y procesa un archivo CSV para extraer la información de los nodos.
+ * Implementa validaciones de dominio para asegurar la integridad de los datos cargados.
+ * Si encuentra algún error, lanza excepción y detiene la ejecución
  */
 fun leerMazo(): List<CartaMostro> {
     val listaDeCartas = mutableListOf<CartaMostro>()
@@ -69,7 +69,8 @@ fun leerMazo(): List<CartaMostro> {
             continue 
         }        
 
-        // Creamos la carta
+        // Creamos la carta (Las validaciones de rango nivel 1-12 y poder % 50 
+        // se ejecutan automáticamente en el init de CartaMostro)
         val carta = CartaMostro(
             nombre, 
             nivel,
@@ -133,6 +134,7 @@ fun sonAdyacentes(a: CartaMostro, b: CartaMostro): Boolean {
     if (a.atributo == b.atributo) coincidencias++
     if (a.poder == b.poder) coincidencias++
     
+    // Mundo chiquito requiere exactamente una coincidencia
     return coincidencias == 1
 }
 
@@ -140,24 +142,29 @@ fun sonAdyacentes(a: CartaMostro, b: CartaMostro): Boolean {
  * Encuentra todas las ternas (cartaMano, cartaMazo1, cartaMazo2) que cumplen:
  * - cartaMazo1 es vecino de cartaMano
  * - cartaMazo2 es vecino de cartaMazo1
+ * - cartaMazo2 debe ser diferente a cartaMano para ser una terna útil.
  */
 fun encontrarTernas(grafo: ListaAdyacenciaGrafo<CartaMostro>): List<Triple<CartaMostro, CartaMostro, CartaMostro>> {
     val ternas = mutableListOf<Triple<CartaMostro, CartaMostro, CartaMostro>>()
     val vertices = grafo.obtenerVertices()
 
-    // Iteramos sobre los vértices
+    // Iteramos sobre los vértices (Cartas en mano)
     for (cartaMano in vertices) {
         val vecinosMano = grafo.obtenerArcosSalida(cartaMano)
 
-        // Iteramos sobre los vecinos de cada vértice
+        // Iteramos sobre los vecinos (Carta puente del mazo)
         for (cartaMazo1 in vecinosMano) {
             val vecinosMazo1 = grafo.obtenerArcosSalida(cartaMazo1)
             
-            // Iteramos sobre los vecinos de cada vecino
+            // Iteramos sobre los vecinos de la carta puente (Carta destino del mazo)
             for (cartaMazo2 in vecinosMazo1) {
 
-                // Almacenamos la terna
-                ternas.add(Triple(cartaMano, cartaMazo1, cartaMazo2))
+                // Verificamos que la carta final no sea la inicial 
+                // para que la terna sea útil según el efecto de la carta.
+                if (cartaMano.nombre != cartaMazo2.nombre) {
+                    // Almacenamos la terna
+                    ternas.add(Triple(cartaMano, cartaMazo1, cartaMazo2))
+                }
             }
         }
     }
@@ -190,9 +197,10 @@ fun main() {
 
         // Imprimimos las ternas
         imprimirTernas(ternas)
-    } catch (e: IllegalArgumentException) {
+    } catch (e: Exception) {
+        // Capturamos cualquier error de formato o validación de CartaMostro
         println(e.message)
-        // Salimos del código porque el mazo no tiene entre 40 y 60 cartas válidas
+        // Salimos del código porque el mazo no cumple las reglas
         System.exit(1)
     }
 }
