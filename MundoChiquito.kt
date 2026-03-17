@@ -11,7 +11,6 @@ fun leerMazo(): List<CartaMostro> {
     val archivo = java.io.File("deck.csv")
     if (!archivo.exists()) {
         throw IllegalArgumentException("Error: Archivo de datos no encontrado.")
-        return listaDeCartas
     }
 
     // Verificamos que hay datos
@@ -33,7 +32,6 @@ fun leerMazo(): List<CartaMostro> {
         // Verificamos la cantidad de atributos
         if (columnas.size != 4) {
             throw IllegalArgumentException("Error en la línea ${i+1}: No tiene los 4 atributos")
-            continue
         }
 
         val nombre = columnas[0]
@@ -41,7 +39,6 @@ fun leerMazo(): List<CartaMostro> {
         // Verificamos que el nombre no este vacío
         if (nombre.isBlank()) {
             throw IllegalArgumentException("Error en linea ${i+1}: El nombre no debe estas vacío")
-            continue
         }
 
         // Verificamos que el nivel sea un entero
@@ -64,7 +61,6 @@ fun leerMazo(): List<CartaMostro> {
             Atributo.valueOf(atributoStr)
         } catch (e: IllegalArgumentException) {
             throw IllegalArgumentException("Error en linea ${i+1}: El atributo no es válido")
-            continue
         }
 
         // Verificamos el límite de copias
@@ -87,7 +83,7 @@ fun leerMazo(): List<CartaMostro> {
 
     // Verificamos el rango del mazo
     if (listaDeCartas.size < 40 || listaDeCartas.size > 60) {
-        throw IllegalArgumentException("El mazo debe tener entre 40 y 60 cartas")
+        throw IllegalArgumentException("El mazo debe tener entre 40 o 60 cartas")
     }
 
     return listaDeCartas
