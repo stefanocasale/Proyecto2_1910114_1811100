@@ -6,16 +6,16 @@
 
 # Pasos de Ejecucion
 1. Instalar Kotlin:
-    - Desde tu terminal de WSL ejecuta el siguiente comando:
+    - Desde tu terminal ejecuta el siguiente comando:
         - sudo apt install kotlin
 2. Ubica tu entorno:
-    - Desde tu terminal de WSL ejecuta el siguiente comando:
+    - Desde tu terminal ejecuta el siguiente comando:
         - cd ubicacion/de/tu/entorno
 3. Compila todos los archivos .kt que estan en la misma carpeta:
-    - Desde tu terminal de WSL ejecuta el siguiente comando:
+    - Desde tu terminal ejecuta el siguiente comando:
         - kotlinc *.kt -d out -include-runtime
 4. Ejecuta Main.kt:
-    - Desde tu terminal de WSL ejecuta el siguiente comando:
+    - Desde tu terminal ejecuta el siguiente comando:
         - kotlin -cp out MundoChiquitoKt
 
 Al compilar se crea una carpeta "out" en tu entorno. Contiene los archivos ya compilados
@@ -76,8 +76,5 @@ Finalmente imprimimos cada una de las ternas en la lista.
 Leyenda: 
 - v = número de vértices (cartas únicas).
 - g = grado promedio del grafo.  
-- t = número de ternas generadas.  
-
-
-
+- t = número de ternas generadas.
 
